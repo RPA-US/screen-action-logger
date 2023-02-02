@@ -24,6 +24,7 @@ node_modules
 develop-eggs/
 dist/
 venv/
+env/
 downloads/
 lib/
 lib64/

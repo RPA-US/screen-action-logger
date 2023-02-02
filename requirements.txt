@@ -30,10 +30,14 @@ lxml
 #lxml==4.6.1
 pydot==1.4.1
 deprecated
+jinja2==3.0
+itsdangerous==2.0.1
 
 # Windows specific dependencies
 pywin32; platform_system == "Windows"
-WMI==1.4.9; platform_system == "Windows"
+werkzeug==2.0.0
+Flask==1.1.1
+WMI; platform_system == "Windows"
 
 # MacOS specific dependencies
 applescript==2019.4.13; platform_system == "Darwin"
@@ -50,6 +54,4 @@ xlwings==0.18.0; platform_system == "Darwin"
 # lime
 # joblib
 # pydotplus
-p4mpy
-# wekzeug==2.0.0
-# Flask==2.1.0 
+pm4py==2.5.1

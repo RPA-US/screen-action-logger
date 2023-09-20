@@ -3,6 +3,8 @@ import pandas
 from multiprocessing.queues import Queue
 import os
 import utils.utils
+from utils.utils import *
+import shutil
 
 try:
     from pm4py.objects.conversion.log import factory as conversion_factory

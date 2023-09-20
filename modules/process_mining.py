@@ -16,6 +16,9 @@ import utils.utils
 # from datetime import datetime, timedelta
 from multiprocessing.queues import Queue
 from deprecated.sphinx import deprecated
+#
+import datetime
+import shutil
 
 try:
     # constants
@@ -87,6 +90,8 @@ class ProcessMining:
             # low level trace used for RPA generation
             self.mostFrequentCase = modules.mostFrequentRoutine.selectMostFrequentCase(self.dataframe, self.status_queue)
 
+
+
     def _create_directories(self):
         """
         Creates directories inside RPA folder where processed files will be saved.
@@ -101,6 +106,10 @@ class ProcessMining:
 
         self.RPA_log_path = os.path.join(self.save_path, utils.utils.EVENT_LOG_FOLDER)
         utils.utils.createDirectory(self.RPA_log_path)
+        
+        self.screenshots_path = os.path.join(self.save_path, "screenshots")
+        utils.utils.createDirectory(self.screenshots_path)
+        
 
         # self.discovery_path = os.path.join(self.save_path, utils.utils.PROCESS_DISCOVERY_FOLDER)
         # utils.utils.createDirectory(self.discovery_path)

@@ -1,1 +1,1 @@
-from modules.events import clipboardEvents, mouseEvents, officeEvents, systemEvents
+from modules.events import clipboardEvents, officeEvents, standardEvents, systemEvents

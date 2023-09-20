@@ -17,8 +17,10 @@ from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from modules import consumerServer
 from utils.utils import *
+import modules.screenshot as sc
 import psutil
 import pynput
+
 
 mouse = pynput.mouse.Controller()
 
@@ -238,6 +240,7 @@ def logProcessesWin():
             exe = []
         path = exe[0] if exe else ""
         print(f"{timestamp()} {USER} {event} {app} {path}")
+        img = sc.take_screenshot()
         session.post(consumerServer.SERVER_ADDR, json={
             "timestamp": timestamp(),
             "user": USER,
@@ -245,7 +248,8 @@ def logProcessesWin():
             "application": app,
             "event_type": event,
             "event_src_path": path,
-            "mouse_coord": mouse.position
+            "mouse_coord": mouse.position,
+            "screenshot": img
         })
 
     new_programs = set()  # needed later to initialize 'closed' set
@@ -371,6 +375,7 @@ def watchRecentsFilesWin():
                     eventType = "openFolder"
 
                 print(f"{timestamp()} {USER} OperatingSystem {eventType} {lnk_target}")
+                img = sc.take_screenshot()
                 session.post(consumerServer.SERVER_ADDR, json={
                     "timestamp": timestamp(),
                     "user": USER,
@@ -378,7 +383,8 @@ def watchRecentsFilesWin():
                     "application": "Finder" if MAC else "Explorer",
                     "event_type": eventType,
                     "event_src_path": lnk_target,
-                    "mouse_coord": mouse.position
+                    "mouse_coord": mouse.position,
+                    "screenshot": img
                 })
 
         except Exception:
@@ -426,6 +432,7 @@ def detectSelectionWindowsExplorer():
                             else:
                                 eventType = "selectedFolder"
                             print(f"{timestamp()} {USER} OperatingSystem {eventType} {path}")
+                            img = sc.take_screenshot()
                             session.post(consumerServer.SERVER_ADDR, json={
                                 "timestamp": timestamp(),
                                 "user": USER,
@@ -433,7 +440,8 @@ def detectSelectionWindowsExplorer():
                                 "application": "Explorer",
                                 "event_type": eventType,
                                 "event_src_path": path,
-                                "mouse_coord": mouse.position
+                                "mouse_coord": mouse.position,
+                                "screenshot":img
                             })
         except Exception as e:
             # print(e)

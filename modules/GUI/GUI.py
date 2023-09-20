@@ -26,6 +26,7 @@ import modules.process_mining
 import utils.utils
 import traceback
 import sys
+import shutil
 
 sys.path.append('../')  # this way main file is visible from this file
 
@@ -87,6 +88,9 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerFilesFolder = self.systemLoggerFilesFolderCB.isChecked()
         self.systemLoggerPrograms = self.systemLoggerProgramsCB.isChecked()
         self.systemLoggerClipboard = self.systemLoggerClipboardCB.isChecked()
+        ###
+        self.systemLoggerStandard = self.systemLoggerStandard.isChecked()
+        ###
         self.systemLoggerHotkeys = self.systemLoggerHotkeysCB.isChecked()
         self.systemLoggerUSB = self.systemLoggerHotkeysCB.isChecked()
         self.systemLoggerEvents = self.systemLoggerEventsCB.isChecked()
@@ -162,6 +166,13 @@ class MainApplication(QMainWindow, QDialog):
         self.systemLoggerClipboardCB.stateChanged.connect(self.handleCheckBox)
         self.systemLoggerClipboardCB.setToolTip("Log clipboard copy")
 
+        #####
+        self.systemLoggerStandard = QCheckBox("Standard")
+        self.systemLoggerStandard.tag = "systemLoggerStandard"
+        self.systemLoggerStandard.stateChanged.connect(self.handleCheckBox)
+        self.systemLoggerStandard.setToolTip("Log clicks and keystroke")
+        #####
+
         self.systemLoggerProgramsCB = QCheckBox("Programs")
         self.systemLoggerProgramsCB.tag = "systemLoggerPrograms"
         self.systemLoggerProgramsCB.stateChanged.connect(self.handleCheckBox)
@@ -188,6 +199,9 @@ class MainApplication(QMainWindow, QDialog):
         layout.addWidget(self.systemLoggerFilesFolderCB)
         layout.addWidget(self.systemLoggerProgramsCB)
         layout.addWidget(self.systemLoggerClipboardCB)
+        ###
+        layout.addWidget(self.systemLoggerStandard)
+        ###
         layout.addWidget(self.systemLoggerHotkeysCB)
         layout.addWidget(self.systemLoggerUSBCB)
         # layout.addWidget(self.systemLoggerEventsCB)
@@ -568,6 +582,9 @@ class MainApplication(QMainWindow, QDialog):
 
         # System checkboxes
         self.systemLoggerClipboardCB.setChecked(self.allCBChecked)
+        ####
+        self.systemLoggerStandard.setChecked(self.allCBChecked)
+        ####
         self.systemLoggerProgramsCB.setChecked(self.allCBChecked)
         self.officeExcelCB.setChecked(self.allCBChecked)
         self.systemLoggerFilesFolderCB.setChecked(self.allCBChecked)
@@ -620,6 +637,8 @@ class MainApplication(QMainWindow, QDialog):
             self.systemLoggerPrograms = checked
         elif (tag == "systemLoggerClipboard"):
             self.systemLoggerClipboard = checked
+        elif (tag == "systemLoggerStandard"):
+            self.systemLoggerStandard = checked
         elif (tag == "systemLoggerHotkeys"):
             self.systemLoggerHotkeys = checked
         elif (tag == "systemLoggerUSB"):
@@ -735,6 +754,7 @@ class MainApplication(QMainWindow, QDialog):
             traceback.print_exc()
             print(traceback.format_exc())
             return False
+    
 
     def PMThreadComplete(self, result):
         """
@@ -917,6 +937,7 @@ class MainApplication(QMainWindow, QDialog):
             # reset counter and list
             self.runCount = 0
             self.csv_to_join.clear()
+        
 
     def showAboutMessage(self):
         """
@@ -985,6 +1006,9 @@ class MainApplication(QMainWindow, QDialog):
         if not any([self.systemLoggerFilesFolder,
                     self.systemLoggerPrograms,
                     self.systemLoggerClipboard,
+                    ###
+                    self.systemLoggerStandard,
+                    ###
                     self.systemLoggerHotkeys,
                     self.systemLoggerUSB,
                     self.systemLoggerEvents,
@@ -1020,6 +1044,9 @@ class MainApplication(QMainWindow, QDialog):
                 self.systemLoggerFilesFolder,
                 self.systemLoggerPrograms,
                 self.systemLoggerClipboard,
+                ###
+                self.systemLoggerStandard,
+                ###
                 self.systemLoggerHotkeys,
                 self.systemLoggerUSB,
                 self.systemLoggerEvents,

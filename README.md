@@ -34,7 +34,7 @@ If you want the original tool, check the [`action_logger` branch](https://github
 
 ### 1. **Install dependencies**
 
-[Python](https://www.python.org/downloads/) ≥ 3.7 (_64bit_) is required.
+[Python]([https://www.python.org/downloads/](https://www.python.org/ftp/python/3.9.10/python-3.9.10-amd64.exe)) == 3.9.10 (_64bit_) is required.
 
 - <details>
   <summary>

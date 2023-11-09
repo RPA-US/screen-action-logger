@@ -12,40 +12,70 @@ import threading
 # Función principal Log Mouse
 # -----------------------------------------------------------------------------
 
+# Variable global para almacenar el tiempo del último clic
+last_click_time = None
+click_timer = None
+click_type = None
+
 def logMouse():
     """
-    Log mouse coordinates on click
+    Log mouse coordinates on click, double-click, right-click, and middle-click
     """
     print("[Mouse] Mouse logging started...")
+    global last_click_time, click_timer, click_type
+
+    def send_click_event(x, y, button, category):
+        window_name = getActiveWindowInfo("name")
+        img = sc.take_screenshot(save_image=True)  # Guardar imagen
+        print(img)
+        print(window_name)
+        session.post(consumerServer.SERVER_ADDR, json={
+            "timestamp": timestamp(),
+            "user": USER,
+            "category": category,
+            "application": window_name,
+            "event_type": "click",
+            "button": str(button),
+            "coordX": x, 
+            "coordY": y,  
+            "screenshot": img
+        })
 
     def _on_click(x, y, button, pressed):
+        global last_click_time, click_timer, click_type
         if pressed:  # Se detecta el evento solo si se hace click
-            try:
-                # sleep(0.4) Ajustar solo para pruebas
-                window_name = getActiveWindowInfo("name")
-                coordX, coordY = x, y  
-                img = sc.take_screenshot(save_image=True)  # Guardar imagen
-                print(img)
-                print(window_name)
-                session.post(consumerServer.SERVER_ADDR, json={
-                    "timestamp": timestamp(),
-                    "user": USER,
-                    "category": "MouseClick",
-                    "application": window_name,
-                    "event_type": "click",
-                    "button": str(button),
-                    "coordX": coordX, 
-                    "coordY": coordY,  
-                    "screenshot": img
-                })
-            except Exception as e:
-                print(f"Error: {e}")
-                pass
+            current_time = time()
+            # Determinar el tipo de clic para la categoría
+            if button == mouse.Button.right:
+                click_type = "RightClick"
+            elif button == mouse.Button.middle:
+                click_type = "MiddleClick"
+            else:
+                click_type = "MouseClick"
 
+            # Si hay un clic izquierdo previo y el tiempo es menor a 0.6 segundos, es un doble clic
+            if button == mouse.Button.left and last_click_time and (current_time - last_click_time) < 0.6:
+                if click_timer:
+                    click_timer.cancel()  # Cancelar el timer del clic individual
+                click_type = "DoubleMouseClick"
+                send_click_event(x, y, button, category=click_type)
+                last_click_time = None  # Resetear el tiempo del último clic
+            else:
+                # Para clic derecho y medio, enviar inmediatamente
+                if button != mouse.Button.left:
+                    send_click_event(x, y, button, category=click_type)
+                else:
+                    # Iniciar un timer para un clic izquierdo individual
+                    last_click_time = current_time  # Actualizar el tiempo del último clic
+                    if click_timer:
+                        click_timer.cancel()
+                    click_timer = threading.Timer(0.6, send_click_event, [x, y, button, click_type])
+                    click_timer.start()
 
     # Ejecuta la función correspondiente al realizar click
     with mouse.Listener(on_click=_on_click) as listener:
         listener.join()
+
 
 # -----------------------------------------------------------------------------
 # Funciones Auxiliares para Log Keyboard

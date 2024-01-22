@@ -160,9 +160,9 @@ def logKeyboard():
                     prev_key = pressed_keys[i - 1]
                     if is_special_or_space(prev_key) or is_special_or_space(key):
                         typed_sequence.append('+')
-                    elif prev_key.endswith(('CTRL', 'ALT', 'SHIFT', 'WIN')) or key.startswith(
-                            ('CTRL', 'ALT', 'SHIFT', 'WIN')):
-                        typed_sequence.append(' + ')  # Añade un espacio entre las combinaciones de teclas
+                    elif ('_' in prev_key and prev_key.split('_')[-1].isalnum()) and key.isalnum():
+                        typed_sequence.append(' + ')  # Añade un espacio y un '+' entre las teclas
+
                 typed_sequence.append(key)
 
             typed_word = ''.join(typed_sequence)

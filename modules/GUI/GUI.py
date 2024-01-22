@@ -168,6 +168,7 @@ class MainApplication(QMainWindow, QDialog):
 
         #####
         self.systemLoggerStandard = QCheckBox("Standard")
+        self.systemLoggerStandard.setChecked(True) #By default, the standard logger is enabled
         self.systemLoggerStandard.tag = "systemLoggerStandard"
         self.systemLoggerStandard.stateChanged.connect(self.handleCheckBox)
         self.systemLoggerStandard.setToolTip("Log clicks and keystroke")

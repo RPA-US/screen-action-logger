@@ -17,6 +17,12 @@ last_click_time = None
 click_timer = None
 click_type = None
 
+# def logGaze():
+    #To Do
+
+
+
+
 def logMouse():
     """
     Log mouse coordinates on click, double-click, right-click, and middle-click

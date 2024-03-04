@@ -1,40 +1,89 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "Webgazer.js",
     "author": "Manuel García Romero",
     "description": "Log user gaze interaction with the screen",
     "version": "1.0.0",
     "icons": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    },
+    "background": {
+      "service_worker": "background_script.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": [
+        "./libs/jszip.min.js",
+        "./assets/js/argon.js",
+        "./assets/js/argon.min.js",
+        "./assets/js/webgazer/bootstrap.min.js",
+        "./assets/js/webgazer/jquery.min.js",
+        "./assets/js/webgazer/calibration.js",
+        "./assets/js/webgazer/main.js",
+        "./assets/js/webgazer/precision_calculation.js",
+        "./assets/js/webgazer/precision_store_points.js",
+        "./assets/js/webgazer/resize_canvas.js",
+        "./assets/js/webgazer/sweetalert.min.js",
+        "./assets/js/webgazer/webgazer.commonjs2.js",
+        "./assets/js/webgazer/webgazer.commonjs2.js.map",
+        "./assets/js/webgazer/webgazer.js",
+        "./assets/js/webgazer/webgazer.js.map",
+        "./assets/js/components/charts/chart-bars.js",
+        "./assets/js/components/charts/chart-bars.min.js",
+        "./assets/js/components/charts/chart-line.js",
+        "./assets/js/components/charts/chart-line.min.js",
+        "./assets/js/components/custom/form-control.js",
+        "./assets/js/components/custom/form-control.min.js",
+        "./assets/js/components/init/chart-init.js",
+        "./assets/js/components/init/chart-init.min.js",
+        "./assets/js/components/init/copy-icon.js",
+        "./assets/js/components/init/copy-icon.min.js",
+        "./assets/js/components/init/navbar.js",
+        "./assets/js/components/init/navbar.min.js",
+        "./assets/js/components/init/scroll-to.js",
+        "./assets/js/components/init/scroll-to.min.js",
+        "./assets/js/components/init/popover.js",
+        "./assets/js/components/init/popover.min.js",
+        "./assets/js/components/init/tooltip.js",
+        "./assets/js/components/init/tooltip.min.js",
+        "./assets/js/components/maps/maps-default.js",
+        "./assets/js/components/maps/maps-default.min.js",
+        "./assets/js/components/vendor/bootstrap-datepicker.js",
+        "./assets/js/components/vendor/bootstrap-datepicker.min.js",
+        "./assets/js/components/vendor/nouislider.js",
+        "./assets/js/components/vendor/nouislider.min.js",
+        "./assets/js/components/vendor/scrollbar.js",
+        "./assets/js/components/vendor/scrollbar.min.js"
+        ]
+      }
+    ],  
+    "permissions": [
+        "tabs", 
+      "alarms",
+      "bookmarks",
+      "downloads",
+      "history",
+      "management",
+      "notifications",
+      "storage",
+      "webNavigation"
+    ],
+    "action": {
+      "default_icon": {
         "16": "icons/icon-16.png",
         "32": "icons/icon-32.png",
         "48": "icons/icon-48.png",
         "128": "icons/icon-128.png"
+      },
+      "default_popup": "webgazerjsAction/index.html",
+      "default_title": "Webgazer.js"
     },
-    "background": {
-        "scripts": [
-            "background_script.js"
-        ],
-        "persistent": false
-    },
-    "permissions": [
-        "tabs",
-        "alarms",
-        "bookmarks",
-        "downloads",
-        "history",
-        "management",
-        "notifications",
-        "storage",
-        "webNavigation"
-    ],
-    "browser_action": {
-        "default_icon": {
-            "16": "icons/icon-16.png",
-            "32": "icons/icon-32.png",
-            "48": "icons/icon-48.png",
-            "128": "icons/icon-128.png"
-        },
-        "default_popup": "webgazerjsAction/index.html",
-        "default_title": "Webgazer.js"
-    }
-}
+    "host_permissions": [
+      "https://*/*",
+      "http://*/*"
+    ]
+  }

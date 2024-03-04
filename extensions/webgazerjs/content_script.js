@@ -1,5 +1,5 @@
-import webgazer from './assets/js/webgazer/webgazer.js';
-import JSZip from './libs/jszip.min.js';
+import * as webgazer from './assets/js/webgazer/webgazer.js';
+import * as JSZip from './libs/jszip.min.js';
 
 // this array will store all the eye movements
  var gaze_points = [];
@@ -89,6 +89,14 @@ import JSZip from './libs/jszip.min.js';
      // hiddenElement.target = '_blank';
      // hiddenElement.download = 'gazeData.csv';
      // hiddenElement.click();
+ }
+
+ function resume() {
+     webgazer.resume();
+ }
+
+ function pause() {
+     webgazer.pause();
  }
 
 //To Do Websocket and API

@@ -6,6 +6,18 @@
 // https://developer.chrome.com/extensions/bookmarks
 // ********************
 
+// log data only if server is running
+// https://developer.chrome.com/apps/storage
+function logAndPost(eventLog) {
+    chrome.storage.local.get(["log_browser"], result => {
+        let log_browser = result.log_browser || false;
+        if (log_browser) {
+            console.log(eventLog);
+            post(eventLog);
+        }
+    });
+}
+
 // Fired when a bookmark or folder is created.
 // https://developer.chrome.com/extensions/windows#event-onCreated
 chrome.bookmarks.onCreated.addListener((id, bookmark) => {
